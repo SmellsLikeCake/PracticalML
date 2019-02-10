@@ -1,0 +1,73 @@
+---
+title: "Predicting Exercise Notes"
+author: "Helen"
+date: "7 February 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warnings = FALSE, cache = TRUE)
+```
+
+## Plan
+
+```{r data and libraries}
+library(caret)
+library(gbm)
+library(e1071)
+training <- read.csv("~/Personal/Coursera/Practical Machine Learning/pml-training.csv")
+```
+
+Use k-fold validation to test different models and tune parameters.
+
+Split the sample into folds using stratification to ensure same numbers of each type of error. Default is 10 and apparently there is evidence that 10 is good.
+
+```{r folds}
+set.seed(134)
+inTrain <- createFolds(training$classe) ## Default is 10
+```
+
+## Exploratory plots
+
+```{r expplots}
+expplots <- function(data, first, last, name){
+  PDFpath <- paste("~/Personal/Coursera/Practical Machine Learning/PracticalML/", name, ".pdf")
+  pdf(file = PDFpath)
+  for (i in first:last){
+    g <- ggplot(data, aes(x = classe, y = data[, i])) + geom_violin() + ylab(names(data[i])) + ggtitle(paste("Column "), i)
+    print(g)
+  }
+  dev.off()
+}
+
+expplots(8, 160, "expplots")
+```
+
+This produced a pdf of lots of plots. The distributions look quite different between the classes for columns:
+32, 50, 51, 52, 56, 60, 61, 63, 65, 66, 67, 75, 77, 82, 83, 84, 104, 105, 107, 117, 131, 154
+
+And a bit different for columns:
+40, 46, 49, 54, 55, 64, 76, 78, 80, 96, 100, 102, 108,  110, 121, 122, 123, 134, 137, 155
+
+```{r 1st useful data}
+training.1 <- training[, c(1, 32, 50, 51, 52, 56, 60, 61,63, 65, 66, 67, 75, 77, 82, 83, 84, 104, 105, 107, 117, 131, 154, 160)]
+```
+
+Look at these in combination with each other.
+
+```{r 1st data scatter}
+expplots2 <- function(data, first, last, name){
+  PDFpath <- paste("~/Personal/Coursera/Practical Machine Learning/PracticalML/", name, ".pdf", sep = "")
+  pdf(file = PDFpath)
+  a <- ceiling(sqrt(last-first+1))
+  for (i in first:last){
+    plots <- list()
+    for (j in first:last){
+      thing <- ggplotGrob(ggplot(data, aes(data[, i], data[, j], colour = data$classe)) + geom_point() + xlab(names(data[, i])) + ylab(names(data[, j])) + ggtitle(paste("Columns ", i, " and ", j, sep = "")) +guides(colour = "none"))
+      plots[[j - first + 1]] <- thing
+  }
+  do.call(grid.arrange, plots)
+  }
+  dev.off()
+}
+```

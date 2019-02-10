@@ -1,0 +1,27 @@
+---
+title: "Predicting Whether Lifting Weights Is Done Correctly"
+author: "Helen"
+date: "7 February 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warnings = FALSE, cache = TRUE)
+```
+
+## Introduction
+
+This report using Machine Learning techniques to predict whether exercises are being done correctly. The data comes from <http://groupware.les.inf.puc-rio.br/har>.
+
+## Method
+
+The following packages were loaded, along with the training data.
+
+```{r data and libraries}
+library(caret)
+library(gbm)
+library(e1071)
+training <- read.csv("~/Personal/Coursera/Practical Machine Learning/pml-training.csv")
+```
+
+
